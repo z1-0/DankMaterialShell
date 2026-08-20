@@ -585,39 +585,39 @@ Singleton {
             if (name === queryLower) {
                 textScore = 10000;
                 matchType = "exact";
+            } else if (exec === queryLower) {
+                textScore = 8000;
+                matchType = "exec";
             } else if (name.startsWith(queryLower)) {
                 textScore = 5000;
                 matchType = "prefix";
+            } else if (exec && exec.startsWith(queryLower)) {
+                textScore = 4000;
+                matchType = "exec_prefix";
             } else if (wordBoundaryMatch(name, queryLower)) {
                 textScore = 3000;
                 matchType = "word_boundary";
-            } else if (name.includes(queryLower)) {
-                textScore = 500;
-                matchType = "substring";
             } else if (genericName && genericName.startsWith(queryLower)) {
                 textScore = 800;
                 matchType = "generic_prefix";
+            } else if (name.includes(queryLower)) {
+                textScore = 500;
+                matchType = "substring";
             } else if (genericName && genericName.includes(queryLower)) {
                 textScore = 400;
                 matchType = "generic";
             } else if (id && id.includes(queryLower)) {
                 textScore = 350;
                 matchType = "id";
-            } else if (exec === queryLower) {
-                textScore = 3000;
-                matchType = "exec";
-            } else if (exec && exec.startsWith(queryLower)) {
-                textScore = 1500;
-                matchType = "exec_prefix";
             } else if (exec && exec.includes(queryLower)) {
-                textScore = 400;
+                textScore = 250;
                 matchType = "exec_substring";
             }
 
             if (matchType === "none" && keywords.length > 0) {
                 for (const keyword of keywords) {
                     if (keyword.startsWith(queryLower)) {
-                        textScore = 300;
+                        textScore = 200;
                         matchType = "keyword_prefix";
                         break;
                     } else if (keyword.includes(queryLower)) {
