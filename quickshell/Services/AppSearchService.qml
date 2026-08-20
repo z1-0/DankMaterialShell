@@ -71,11 +71,18 @@ Singleton {
         if (cached) {
             const currentIcon = app.icon || "";
             const cachedSourceIcon = cached._sourceIcon || "";
-            if (currentIcon === cachedSourceIcon)
+            if (currentIcon === cachedSourceIcon) {
+                if (app._preScored !== undefined)
+                    cached._preScored = app._preScored;
+                else
+                    delete cached._preScored;
                 return cached;
+            }
         }
         const transformed = transformFn(app);
         transformed._sourceIcon = app.icon || "";
+        if (app._preScored !== undefined)
+            transformed._preScored = app._preScored;
         _transformCache[id] = transformed;
         return transformed;
     }
@@ -673,7 +680,10 @@ Singleton {
         }
 
         scoredApps.sort((a, b) => b.score - a.score);
-        return scoredApps.slice(0, maxResults).map(item => item.app);
+        return scoredApps.slice(0, maxResults).map(item => {
+            item.app._preScored = item.score;
+            return item.app;
+        });
     }
 
     function searchAppActions(query, apps) {
