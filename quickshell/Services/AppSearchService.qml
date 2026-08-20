@@ -478,18 +478,14 @@ Singleton {
         return matrix[len1][len2];
     }
 
-    function getExecName(app) {
-        const execString = (app.execString || app.exec || "").trim();
+    function getExecName(execString) {
+        execString = execString.trim();
         if (!execString)
             return "";
-        const parts = execString.split(/\s+/);
-        let cmd = parts[0] || "";
-        while (cmd.includes("=") && parts.length > 1) {
-            parts.shift();
-            cmd = parts[0] || "";
-        }
-        cmd = cmd.replace(/^["']|["']$/g, "");
-        return cmd.split("/").pop().toLowerCase();
+        const cmd = execString.split(/\s+/).find(p => !/^[\w.-]+=/.test(p));
+        if (!cmd)
+            return "";
+        return cmd.replace(/^["']|["']$/g, "").split("/").pop();
     }
 
     function fuzzyMatchScore(text, query) {
@@ -576,7 +572,7 @@ Singleton {
             const genericName = (app.genericName || "").toLowerCase();
             const comment = (app.comment || "").toLowerCase();
             const id = (app.id || "").toLowerCase();
-            const exec = getExecName(app);
+            const exec = getExecName(app.execString || app.exec || "").toLowerCase();
             const keywords = app.keywords ? app.keywords.map(k => k.toLowerCase()) : [];
 
             let textScore = 0;
