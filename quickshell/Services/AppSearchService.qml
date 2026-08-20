@@ -478,6 +478,20 @@ Singleton {
         return matrix[len1][len2];
     }
 
+    function getExecName(app) {
+        const execString = (app.execString || app.exec || "").trim();
+        if (!execString)
+            return "";
+        const parts = execString.split(/\s+/);
+        let cmd = parts[0] || "";
+        while (cmd.includes("=") && parts.length > 1) {
+            parts.shift();
+            cmd = parts[0] || "";
+        }
+        cmd = cmd.replace(/^["']|["']$/g, "");
+        return cmd.split("/").pop().toLowerCase();
+    }
+
     function fuzzyMatchScore(text, query) {
         const queryLower = query.toLowerCase();
         const maxDistance = query.length <= 2 ? 0 : query.length === 3 ? 1 : query.length <= 6 ? 2 : 3;
@@ -562,6 +576,7 @@ Singleton {
             const genericName = (app.genericName || "").toLowerCase();
             const comment = (app.comment || "").toLowerCase();
             const id = (app.id || "").toLowerCase();
+            const exec = getExecName(app);
             const keywords = app.keywords ? app.keywords.map(k => k.toLowerCase()) : [];
 
             let textScore = 0;
@@ -588,6 +603,15 @@ Singleton {
             } else if (id && id.includes(queryLower)) {
                 textScore = 350;
                 matchType = "id";
+            } else if (exec === queryLower) {
+                textScore = 3000;
+                matchType = "exec";
+            } else if (exec && exec.startsWith(queryLower)) {
+                textScore = 1500;
+                matchType = "exec_prefix";
+            } else if (exec && exec.includes(queryLower)) {
+                textScore = 400;
+                matchType = "exec_substring";
             }
 
             if (matchType === "none" && keywords.length > 0) {
